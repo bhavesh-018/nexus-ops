@@ -26,7 +26,7 @@ sample-services/  infra/{observability,nginx,terraform}  docs/
 
 ## Commands (update as milestones add them)
 - Start infra: `docker compose up -d`
-- Backend tests: `cd backend && pytest`
+- Backend tests: `cd backend && pytest` (add `RUN_INTEGRATION=1` with Docker infra up to include real Postgres/Redis tests; CI always does)
 - Lint: `cd backend && ruff check .`
 - Migrations (from Milestone 2): `cd backend && alembic upgrade head`
 - Frontend (from Milestone 3): `cd frontend && npm run build && npm test`
@@ -40,7 +40,9 @@ sample-services/  infra/{observability,nginx,terraform}  docs/
 - Small, meaningful commits (e.g. `feat: add service registry API`).
 
 ## Workflow
+0. **Git: never commit directly to `main`.** Every change happens on a branch (`feat/...`, `fix/...`, `chore/...`). `main` only receives merges, and only after CI (`.github/workflows/ci.yml`) is green. Never push or merge unless the owner asks.
 1. Work in small, verifiable milestones; **run tests after every milestone** and fix failures before moving on.
 2. For each major piece, explain: what we're building, why, how it works, which engineering concepts it shows, how components communicate, and the trade-offs. The owner is learning.
 3. Update docs (this file, README, blueprint) when decisions or commands change.
-4. Current status: **Phase 1, Milestone 1** (scaffolding, Docker infra, FastAPI core).
+4. Every new feature ships with tests, and CI must run them. When a new part is added (frontend, workers), add its job to the CI workflow.
+5. Current status: **Phase 1, Milestone 1 done**; next is Milestone 2 (schema, auth, service registry).
