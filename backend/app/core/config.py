@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Repo-root .env, so the API works no matter which directory it is started from.
@@ -19,6 +20,13 @@ class Settings(BaseSettings):
     redis_url: str
     db_pool_size: int = 5
     db_max_overflow: int = 10
+
+    # Auth. The secret signs JWTs: anyone who has it can forge logins, so it is required
+    # (no default) and must be long.
+    jwt_secret: str = Field(min_length=32)
+    jwt_algorithm: str = "HS256"
+    access_token_minutes: int = 15
+    refresh_token_days: int = 7
 
 
 @lru_cache
