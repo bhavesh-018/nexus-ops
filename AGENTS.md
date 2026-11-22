@@ -40,7 +40,7 @@ sample-services/  infra/{observability,nginx,terraform}  docs/
 - Small, meaningful commits (e.g. `feat: add service registry API`).
 
 ## Workflow
-0. **Git: never commit directly to `main`.** Every change happens on a branch (`feat/...`, `fix/...`, `chore/...`). `main` only receives merges, and only after CI (`.github/workflows/ci.yml`) is green. Never push or merge unless the owner asks.
+0. **Git: never commit directly to `main`, and let the owner run all `git` commands.** Every change happens on a branch (`feat/...`, `fix/...`, `chore/...`). `main` only receives merges, and only after CI (`.github/workflows/ci.yml`) is green. Never run `git checkout`, `git add`, `git commit`, `git push`, or `git merge` yourself—give the owner the branch name, files, and commit message.
 1. Work in small, verifiable milestones; **run tests after every milestone** and fix failures before moving on.
 2. For each major piece, explain: what we're building, why, how it works, which engineering concepts it shows, how components communicate, and the trade-offs. The owner is learning.
 3. Update docs (this file, README, blueprint) when decisions or commands change.

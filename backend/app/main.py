@@ -3,7 +3,9 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 from redis.asyncio import Redis
 
 from app.api import health
@@ -45,8 +47,24 @@ async def domain_error_handler(_: Request, exc: Exception) -> JSONResponse:
     )
 
 
-def create_app() -> FastAPI:
+def _resolve_cors_origins(explicit: list[str] | None) -> list[str]:
+    if explicit is not None:
+        return explicit
+    try:
+        return get_settings().cors_origins
+    except ValidationError:
+        return ["http://localhost:5173"]
+
+
+def create_app(cors_origins: list[str] | None = None) -> FastAPI:
     app = FastAPI(title="NexusOps API", version="0.2.0", lifespan=lifespan)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_resolve_cors_origins(cors_origins),
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
+    )
     app.add_exception_handler(DomainError, domain_error_handler)
     app.include_router(health.router)
     app.include_router(api_router)
