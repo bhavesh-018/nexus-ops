@@ -1,8 +1,13 @@
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+
+import { AppShell } from "./components/AppShell";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { LoginPage } from "./pages/LoginPage";
+import { OverviewPage } from "./pages/OverviewPage";
+import { ServicesPage } from "./pages/ServicesPage";
 
-function AppContent() {
-  const { user, loading, logout } = useAuth();
+function AppRoutes() {
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -13,34 +18,32 @@ function AppContent() {
   }
 
   if (!user) {
-    return <LoginPage />;
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-canvas text-slate-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-lg border border-border bg-surface p-6">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Signed in</p>
-        <h1 className="mt-1 text-lg font-semibold">{user.full_name}</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          {user.email} · <span className="font-mono text-slate-300">{user.role}</span>
-        </p>
-        <button
-          type="button"
-          onClick={() => void logout()}
-          className="mt-5 rounded-md border border-border bg-panel px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800"
-        >
-          Sign out
-        </button>
-      </div>
-    </main>
+    <Routes>
+      <Route element={<AppShell />}>
+        <Route path="/" element={<OverviewPage />} />
+        <Route path="/services" element={<ServicesPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
 export function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
