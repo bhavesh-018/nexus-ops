@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     access_token_minutes: int = 15
     refresh_token_days: int = 7
 
+    # Browser origins allowed to call the API (e.g. Vite dev server).
+    cors_origins: list[str] = ["http://localhost:5173"]
+
     # Rate limits (Redis-backed). Login is limited per (client IP + email) so one attacker
     # can't lock a victim out from elsewhere, plus a looser per-IP cap against email spraying.
     login_max_attempts: int = Field(default=5, ge=1)

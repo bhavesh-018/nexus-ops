@@ -85,3 +85,14 @@ def test_json_formatter_emits_valid_json() -> None:
     data = json.loads(JsonFormatter().format(record))
     assert data["message"] == "hello world"
     assert data["level"] == "INFO"
+
+
+async def test_cors_allows_configured_origin_only() -> None:
+    app = create_app(cors_origins=["http://localhost:5173"])
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        allowed = await client.get("/health", headers={"Origin": "http://localhost:5173"})
+        blocked = await client.get("/health", headers={"Origin": "https://evil.example"})
+    assert allowed.headers["access-control-allow-origin"] == "http://localhost:5173"
+    assert "access-control-allow-origin" not in blocked.headers
