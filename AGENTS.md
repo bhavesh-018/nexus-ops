@@ -28,7 +28,7 @@ sample-services/  infra/{observability,nginx,terraform}  docs/
 - Start infra: `docker compose up -d`
 - Backend tests: `cd backend && pytest` (add `RUN_INTEGRATION=1` with Docker infra up to include real Postgres/Redis tests; CI always does)
 - Lint: `cd backend && ruff check .`
-- Migrations (from Milestone 2): `cd backend && alembic upgrade head`
+- Migrations: `cd backend && alembic upgrade head` (new migration: `alembic revision --autogenerate -m "..."`, then review it; `alembic check` must pass)
 - Frontend (from Milestone 3): `cd frontend && npm run build && npm test`
 
 ## Conventions
@@ -45,4 +45,4 @@ sample-services/  infra/{observability,nginx,terraform}  docs/
 2. For each major piece, explain: what we're building, why, how it works, which engineering concepts it shows, how components communicate, and the trade-offs. The owner is learning.
 3. Update docs (this file, README, blueprint) when decisions or commands change.
 4. Every new feature ships with tests, and CI must run them. When a new part is added (frontend, workers), add its job to the CI workflow.
-5. Current status: **Phase 1, Milestone 1 done**; next is Milestone 2 (schema, auth, service registry).
+5. Current status: **Phase 1, Milestone 2 + hardening done** (schema, JWT auth + rotation/revocation, Redis rate limiting, RBAC, service registry, append-only audit logs); next is Milestone 3 (React frontend).

@@ -40,6 +40,7 @@ jobs:
       # Throwaway CI values; not secrets.
       DATABASE_URL: postgresql+asyncpg://nexusops:ci-only-password@localhost:5432/nexusops
       REDIS_URL: redis://localhost:6379/0
+      JWT_SECRET: ci-only-jwt-secret-not-used-anywhere-else-0123456789
       RUN_INTEGRATION: "1"
 
     defaults:
@@ -56,5 +57,9 @@ jobs:
       - run: pip install -e ".[dev]"
       - name: Lint
         run: ruff check .
+      - name: Apply database migrations
+        run: alembic upgrade head
+      - name: Models match migrations
+        run: alembic check
       - name: Tests
         run: pytest -q
