@@ -9,7 +9,7 @@ from redis.asyncio import Redis
 from app.api import health
 from app.api.v1.router import api_router
 from app.core.config import get_settings
-from app.core.errors import DomainError
+from app.core.errors import DomainError, RateLimitedError
 from app.core.logging import configure_logging
 from app.db.session import create_engine, create_session_factory
 
@@ -33,7 +33,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 async def domain_error_handler(_: Request, exc: Exception) -> JSONResponse:
     """Turn business-rule errors into one consistent JSON shape."""
     assert isinstance(exc, DomainError)
-    headers = {"WWW-Authenticate": "Bearer"} if exc.status_code == 401 else None
+    headers: dict[str, str] | None = None
+    if exc.status_code == 401:
+        headers = {"WWW-Authenticate": "Bearer"}
+    elif isinstance(exc, RateLimitedError):
+        headers = {"Retry-After": str(exc.retry_after)}
     return JSONResponse(
         status_code=exc.status_code,
         content={"error": {"code": exc.code, "message": exc.message}},

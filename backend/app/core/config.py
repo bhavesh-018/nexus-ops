@@ -28,6 +28,14 @@ class Settings(BaseSettings):
     access_token_minutes: int = 15
     refresh_token_days: int = 7
 
+    # Rate limits (Redis-backed). Login is limited per (client IP + email) so one attacker
+    # can't lock a victim out from elsewhere, plus a looser per-IP cap against email spraying.
+    login_max_attempts: int = Field(default=5, ge=1)
+    login_ip_max_attempts: int = Field(default=50, ge=1)
+    login_window_seconds: int = Field(default=900, ge=1)
+    register_max_per_window: int = Field(default=10, ge=1)
+    register_window_seconds: int = Field(default=3600, ge=1)
+
 
 @lru_cache
 def get_settings() -> Settings:

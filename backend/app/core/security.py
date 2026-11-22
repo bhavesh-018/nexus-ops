@@ -1,4 +1,5 @@
 import uuid
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 
@@ -28,13 +29,21 @@ class TokenType(StrEnum):
     REFRESH = "refresh"
 
 
+@dataclass(frozen=True)
+class TokenClaims:
+    user_id: uuid.UUID
+    jti: str  # unique id of this one token; lets us revoke it individually
+    issued_at: float  # unix seconds, fractional (so "revoke everything before now" is exact)
+    expires_at: float
+
+
 def create_token(
     user_id: uuid.UUID,
     token_type: TokenType,
     settings: Settings,
     now: datetime | None = None,
 ) -> str:
-    """Signed JWT. Holds only who (sub) and what kind (type), never the role:
+    """Signed JWT. Holds who (sub), what kind (type) and which token (jti), never the role:
     the role is read from the database on each request so changes apply immediately."""
     now = now or datetime.now(UTC)
     lifetime = (
@@ -45,23 +54,29 @@ def create_token(
     payload = {
         "sub": str(user_id),
         "type": token_type.value,
-        "iat": now,
+        "jti": uuid.uuid4().hex,
+        "iat": now.timestamp(),
         "exp": now + lifetime,
     }
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
-def decode_token(token: str, expected: TokenType, settings: Settings) -> uuid.UUID:
-    """Return the user id, or raise AuthenticationError (bad signature, expired, wrong type)."""
+def decode_token(token: str, expected: TokenType, settings: Settings) -> TokenClaims:
+    """Return the claims, or raise AuthenticationError (bad signature, expired, wrong type)."""
     try:
         payload = jwt.decode(
             token,
             settings.jwt_secret,
             algorithms=[settings.jwt_algorithm],
-            options={"require": ["exp", "sub", "type"]},
+            options={"require": ["exp", "sub", "type", "jti", "iat"]},
         )
         if payload["type"] != expected.value:
             raise AuthenticationError("wrong token type")
-        return uuid.UUID(payload["sub"])
+        return TokenClaims(
+            user_id=uuid.UUID(payload["sub"]),
+            jti=str(payload["jti"]),
+            issued_at=float(payload["iat"]),
+            expires_at=float(payload["exp"]),
+        )
     except (jwt.PyJWTError, ValueError) as exc:
         raise AuthenticationError("invalid or expired token") from exc

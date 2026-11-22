@@ -44,7 +44,18 @@ def test_token_roundtrip() -> None:
     settings = make_settings()
     user_id = uuid.uuid4()
     token = create_token(user_id, TokenType.ACCESS, settings)
-    assert decode_token(token, TokenType.ACCESS, settings) == user_id
+    claims = decode_token(token, TokenType.ACCESS, settings)
+    assert claims.user_id == user_id
+    assert claims.expires_at > claims.issued_at
+
+
+def test_every_token_has_a_unique_id() -> None:
+    settings = make_settings()
+    user_id = uuid.uuid4()
+    refresh = TokenType.REFRESH
+    first = decode_token(create_token(user_id, refresh, settings), refresh, settings)
+    second = decode_token(create_token(user_id, refresh, settings), refresh, settings)
+    assert first.jti != second.jti
 
 
 def test_refresh_token_cannot_be_used_as_access_token() -> None:

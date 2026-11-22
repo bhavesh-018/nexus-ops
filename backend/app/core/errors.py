@@ -27,3 +27,17 @@ class AuthenticationError(DomainError):
 class PermissionDeniedError(DomainError):
     status_code = 403
     code = "forbidden"
+
+
+class RateLimitedError(DomainError):
+    status_code = 429
+    code = "rate_limited"
+
+    def __init__(self, message: str, retry_after: int) -> None:
+        super().__init__(message)
+        self.retry_after = retry_after  # seconds; sent as the Retry-After header
+
+
+class ServiceUnavailableError(DomainError):
+    status_code = 503
+    code = "service_unavailable"
