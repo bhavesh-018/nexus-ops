@@ -97,9 +97,11 @@ export function LoginPage() {
                   </label>
                   <input
                     id="org-name"
+                    name="organization_name"
                     type="text"
                     required
                     minLength={2}
+                    autoComplete="organization"
                     value={organizationName}
                     onChange={(e) => setOrganizationName(e.target.value)}
                     placeholder="Acme Infrastructure"
@@ -112,8 +114,10 @@ export function LoginPage() {
                   </label>
                   <input
                     id="full-name"
+                    name="full_name"
                     type="text"
                     required
+                    autoComplete="name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Ada Lovelace"
@@ -129,8 +133,10 @@ export function LoginPage() {
               </label>
               <input
                 id="email"
+                name="email"
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="ada@acme.io"
@@ -144,8 +150,10 @@ export function LoginPage() {
               </label>
               <input
                 id="password"
+                name="password"
                 type="password"
                 required
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
                 minLength={mode === "register" ? 12 : 1}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

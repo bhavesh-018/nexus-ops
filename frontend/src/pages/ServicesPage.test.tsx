@@ -108,6 +108,7 @@ describe("ServicesPage", () => {
 
     fireEvent.click(screen.getAllByRole("button", { name: "Thresholds" })[0]);
     expect(await screen.findByText("Monitoring Thresholds")).toBeInTheDocument();
+    expect(screen.getByRole("dialog").parentElement?.parentElement).toBe(document.body);
   });
 
   it("hides write actions for viewer role", async () => {
